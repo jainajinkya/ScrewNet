@@ -62,9 +62,15 @@ class ArticulationDataset(Dataset):
             l_hat, m, theta, d = transform_to_screw(translation=pt1_T_pt2[:3],
                                                     quat_in_wxyz=pt1_T_pt2[3:])
 
+            '''
             # Convert line in object_local_coordinates
             new_l = transform_plucker_line(np.concatenate((l_hat, m)), trans=obj_T_pt1[:3], quat=obj_T_pt1[3:])
             label[i, :] = np.concatenate((new_l, [theta], [d]))  # This defines frames wrt pt 1
+            '''
+
+            # global labels
+            new_l_global = transform_plucker_line(np.concatenate((l_hat, m)), trans=pt1[:3], quat=pt1[3:])
+            label[i, :] = np.concatenate((new_l_global, [theta], [d]))  # This defines frames wrt pt 1
 
         # Normalize labels
         label[:, 3:6] /= self.normalization_factor
