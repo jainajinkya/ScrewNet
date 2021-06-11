@@ -28,7 +28,8 @@ class ArticulationDataset(Dataset):
 
     def __getitem__(self, idx):
         if self.labels_data is None:
-            self.labels_data = h5py.File(os.path.join(self.root_dir, 'complete_data.hdf5'), 'r')
+            #self.labels_data = h5py.File(os.path.join(self.root_dir, 'complete_data.hdf5'), 'r')
+            self.labels_data = h5py.File(os.path.join(self.root_dir, 'complete_data_compressed.hdf5'), 'r')
 
         # One Sample for us corresponds to one instantiation of an object type
         obj_data = self.labels_data['obj_' + str(idx).zfill(6)]

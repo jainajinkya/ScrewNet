@@ -1,6 +1,7 @@
 import argparse
 import os
 
+import h5py
 import torch
 
 from dataset import ArticulationDataset
@@ -16,12 +17,12 @@ if __name__ == "__main__":
     parser.add_argument("--model-name", type=str, default="test_lstm")
     parser.add_argument("--test-dir", type=str, default="../data/test/microwave/")
     parser.add_argument("--output-dir", type=str, default="./plots/")
-    parser.add_argument(
-        "--ntest",
-        type=int,
-        default=100,
-        help="number of test samples (n_object_instants)",
-    )
+    #parser.add_argument(
+    #    "--ntest",
+    #    type=int,
+    #    default=100,
+    #    help="number of test samples (n_object_instants)",
+    #)
     parser.add_argument(
         "--ndof",
         type=int,
@@ -43,12 +44,6 @@ if __name__ == "__main__":
         default="lstm",
         help="screw, noLSTM, 2imgs, l2, baseline",
     )
-    parser.add_argument(
-        "--load-wts",
-        action="store_true",
-        default=False,
-        help="Should load model wts from prior run?",
-    )
     parser.add_argument("--obj", type=str, default="microwave")
     args = parser.parse_args()
 
@@ -57,16 +52,19 @@ if __name__ == "__main__":
     )
     os.makedirs(output_dir, exist_ok=True)
 
+    test_file = os.path.join(args.test_dir, "complete_data_compressed.hdf5")
+    with h5py.File(test_file, "r") as f:
+        args.ntest = len(f)
+
+    print(args)
+    print("cuda?", torch.cuda.is_available())
+
     if torch.cuda.is_available():
         device = torch.device(args.device)
     else:
         device = torch.device("cpu")
 
-    # Plotting Histograms as percentages
-    formatter = FuncFormatter(to_percent)
-    global percent_scale
-
-    print("Testing ScrewNet")
+    print("Testing ScrewNet on device: {}".format(device))
     best_model = ScrewNet(lstm_hidden_dim=1000, n_lstm_hidden_layers=1, n_output=8)
     test_set = ArticulationDataset(args.ntest, args.test_dir)
 
